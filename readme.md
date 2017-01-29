@@ -32,5 +32,21 @@ $ composer create-project kayrules/solatjakim-api-site --stability="dev"
 
 After composer finished install the dependencies, it should automatically change the storage folder permission to 777. Just incase if it's not did as expected, you need to manually change it recursively as command below.
 ```
-$ chmod -R 777 app/storage/
+$ chmod -R 777 storage/
+```
+
+###4. Artisan Command
+
+Execute artisan command to execute migration files, create required tables, seed zone information
+```
+$ php artisan migrate
+$ php artisan db:seed
+```
+
+##Crawler
+
+Crawler scripts is not attached to laravel framework / eloquent. Triggering the script will directly insert prayer times record into database. You will need to enable php cli and trigger it from command line as follows.
+```
+$ cd crawler
+$ php crawler.php
 ```

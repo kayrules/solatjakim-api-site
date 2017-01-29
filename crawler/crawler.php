@@ -9,8 +9,8 @@ require 'mysql.class.php';
 define('PROXY', false);
 define('DB_HOST','localhost');
 define('DB_NAME','api_solatjakim');
-define('DB_USER','euph0rix');
-define('DB_PASS','@fjme90!');
+define('DB_USER','root');
+define('DB_PASS','');
 
 define('START_MONTH',1);
 
@@ -59,7 +59,7 @@ function insertIntoMysql($zone, $year, $bulan, $ar) {
                         asar='".$asar."',
                         maghrib='".$maghrib."',
                         isyak='".$isyak."'
-                "); 
+                ");
                 echo " -- done.\n";
         }
 }
