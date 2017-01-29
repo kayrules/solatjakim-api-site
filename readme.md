@@ -1,8 +1,12 @@
-#Solat Jakim REST API Unofficial Site
+#Solat Jakim REST API (Unofficial) For Laravel 4
 
 Solat Jakim REST API web site is an unoffical site for serving public REST API for Waktu Solat in Malaysia provided by Jakim. The website source codes was purposely made public in GitHub so that anybody interested in this project could contribute to the work.
 
 The website was built using Laravel MVC, with Eloquant as the database provider for MySQL and Blade as the template engine.
+
+##Laravel 5
+
+For Laravel 5 Installation see [master](https://github.com/kayrules/solatjakim-api-site) branch.
 
 ##Live Website
 The latest version of the website will always be available at http://api.kayrules.com/solatjakim
