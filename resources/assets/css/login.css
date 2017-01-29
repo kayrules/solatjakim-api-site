@@ -1,0 +1,38 @@
+.panel.panel-login {
+    border-radius: 10px;
+    padding: 10px;
+}
+
+.panel.panel-login .tagline {
+    text-align: center;
+    padding-bottom: 5px;
+}
+.panel.panel-login .tagline h4 {
+    font-weight: bold;
+}
+.panel.panel-login .atau {
+    margin-top:-26px;
+    text-align:center;
+    /*margin-top: 10px;*/
+    margin-bottom: 10px;
+    font-size: 14px;
+    color: #aaa;
+}
+.panel.panel-login .atau > span {
+    background-color: #fff;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+.panel.panel-login .loginform {
+    padding-top: 5px;
+}
+.panel.panel-login .socialbtns {
+    padding-bottom: 20px;
+}
+.panel.panel-login .forgotpass {
+    text-align: center;
+    margin-top: 10px;
+}
+.panel.panel-login .forgotpass a {
+    color: blue;
+}
