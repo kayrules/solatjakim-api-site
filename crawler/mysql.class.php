@@ -5,7 +5,7 @@
 	filename : dbase.class.php
 	date : 07/10/05
 	last update : 07/10/05
-	author : kayrules@gmail.com
+	author : me@kayrules.com
 	description : database class function
 */
 
