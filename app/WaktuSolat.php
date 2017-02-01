@@ -8,6 +8,11 @@ use Carbon\Carbon;
 class WaktuSolat extends Model
 {
     protected $table = 'waktu_solat';
+	protected $dateFormat = 'Y-m-d H:i:s';
+	protected $dates = [
+        'created_at',
+        'updated_at',
+    ];
 
 	public function scopeLastUpdate($query)
 	{
