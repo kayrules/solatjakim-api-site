@@ -27,9 +27,7 @@ class CreateWaktuSolatTable extends Migration {
 			$table->integer('asar')->unsigned();
 			$table->integer('maghrib')->unsigned();
 			$table->integer('isyak')->unsigned();
-			// $table->timestamps();
-			$table->timestamp('created_at')->default(\DB::raw('CURRENT_TIMESTAMP'));
-			$table->timestamp('updated_at')->default(\DB::raw('CURRENT_TIMESTAMP'));
+			$table->timestamps();
 
 			$table->index('zone');
 			$table->index(array('day', 'month', 'year'));

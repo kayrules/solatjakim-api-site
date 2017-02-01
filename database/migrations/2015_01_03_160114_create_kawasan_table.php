@@ -18,9 +18,7 @@ class CreateKawasanTable extends Migration {
 			$table->string('zone', 5);
 			$table->string('negeri', 50);
 			$table->string('lokasi', 255);
-			// $table->timestamps();
-			$table->timestamp('created_at')->default(\DB::raw('CURRENT_TIMESTAMP'));
-			$table->timestamp('updated_at')->default(\DB::raw('CURRENT_TIMESTAMP'));
+			$table->timestamps();
 
 			$table->index('zone');
 			$table->index('negeri');
