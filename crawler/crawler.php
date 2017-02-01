@@ -58,7 +58,9 @@ function insertIntoMysql($zone, $year, $bulan, $ar) {
                         zohor='".$zohor."',
                         asar='".$asar."',
                         maghrib='".$maghrib."',
-                        isyak='".$isyak."'
+                        isyak='".$isyak."',
+						created_at='".NOW()."',
+						updated_at='".NOW()."'
                 ");
                 echo " -- done.\n";
         }
