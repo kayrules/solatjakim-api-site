@@ -33,7 +33,7 @@ class HomeController extends Controller {
 
 		$last_update = WaktuSolat::orderBy('created_at', 'desc')->first();
 		$params = array(
-			'last_update' => $last_update->created_at->format('d-m-Y H:ia')
+			'last_update' => $last_update->created_at
 		);
 		return view('home.disclaimer', $params);
 	}
@@ -109,7 +109,7 @@ class HomeController extends Controller {
 			'states' => $states,
 			'results' => $results,
 			'status' => $status,
-			'last_update' => $last_update->created_at->format('d-m-Y H:ia')
+			'last_update' => $last_update->created_at
 			);
 
 		return view('home.status', $params);
