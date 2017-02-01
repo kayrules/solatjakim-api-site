@@ -28,8 +28,8 @@ class HomeController extends Controller {
 
 	public function getDisclaimer()
 	{
-		$geoip = geoip()->getLocation();
-		debug($geoip);
+		// $geoip = geoip()->getLocation();
+		// debug($geoip);
 
 		$last_update = WaktuSolat::orderBy('created_at', 'desc')->first();
 		$params = array(
