@@ -2,11 +2,12 @@
 /vendor
 composer.phar
 composer.lock
+.env
 .env.*.php
 .env.php
 .DS_Store
 Thumbs.db
 sftp-config.json
 HOWTO
-jakim.sublime-workspace
 Envoy.blade.php
+.gitignore
