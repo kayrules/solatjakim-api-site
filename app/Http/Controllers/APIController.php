@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Kawasan;
 use App\WaktuSolat;
 use App\Classes\Helper;
+use Illuminate\Support\Facades\DB;
 
 /**
 * RESTful class that return JSON String
@@ -519,39 +520,28 @@ class APIController extends Controller
 		return response()->json($final);
 	}
 
-	public function coordinate()
+	public function coordinate(Request $request)
 	{
-		$geoip = geoip($ip = '');
-		debug($geoip);
-
+		if ($request->has('latitude') && $request->has('longitude')) {
+			$lat = $request->latitude;
+			$lng = $request->longitude;
+			$results = DB::select('SELECT id, zone, negeri, lokasi, lat, lng, 
+				SQRT( POW( 69.1 * ( lat - ? ) , 2 ) + POW( 69.1 * ( ? - lng ) * COS( lat / 57.3 ) , 2 ) ) 
+				AS distance FROM kawasan ORDER BY distance ASC LIMIT 1', [$lat, $lng]);
+		} else {
+			$results = Kawasan::all(); 
+		}
+		$pre = $request->pre;
+		
 		$final = array(
-			'geoip' => $geoip
+			'results' => $results
 			);
-
-		return response()->json($final);
-		// $lat = $request->latitude');
-		// $lng = $request->longitude');
-		// $pre = $request->pre');
-		// $gets = array('zone', 'negeri', 'lokasi', 'lat', 'lng');
-		//
-		// // $query = "SELECT * FROM kawasan ORDER BY distance(lat, lng, $lat, $lng)";
-		// $query = "SELECT * FROM kawasan";
-		// // $results = Kawasan::where(1)->get(); //select(DB::raw($query))->get($gets);
-		// $results = DB::table('kawasan')->select(DB::raw($query))->get();
-		//
-		// print_r($query);
-		//
-		//
-		// $final = array(
-		// 	// 'states' => $states,
-		// 	'results' => $results
-		// 	);
-		//
-		// if ($pre == 'true' || $pre == 'TRUE') {
-		// 	return '<pre>' . Helper::json_formatter(json_encode($final)) . '</pre>';
-		// } else {
-		// 	return response()->json($final);
-		// }
+		
+		if ($pre == 'true' || $pre == 'TRUE') {
+			return '<pre>' . Helper::json_formatter(json_encode($final)) . '</pre>';
+		} else {
+			return response()->json($final);
+		}
 	}
 
 	private function _get_times($z, $f, $d, $m, $y)
