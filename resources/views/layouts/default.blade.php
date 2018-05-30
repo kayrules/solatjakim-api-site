@@ -19,6 +19,13 @@
   <!--[if lt IE 9]>
     <script src="{{ elixir('js/ie.js') }}"></script>
   <![endif]-->
+  <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+  <script>
+    (adsbygoogle = window.adsbygoogle || []).push({
+      google_ad_client: "ca-pub-5074013478480248",
+      enable_page_level_ads: true
+    });
+  </script>
 </head>
 <body>
 <section class="vbox">
