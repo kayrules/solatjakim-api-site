@@ -9,149 +9,128 @@ require 'mysql.class.php';
 define('PROXY', false);
 define('DB_HOST','localhost');
 define('DB_NAME','api_solatjakim');
-define('DB_USER','root');
-define('DB_PASS','');
-
+define('DB_USER','euph0rix');
+define('DB_PASS','@fjme90!');
 define('START_MONTH',1);
-
+define('FILENAME', 'checksum.txt');
 
 //start process
-fetchAllZones('2017');
+fetchAllZones('2020');
+// fetchAnnually('JHR01');
 
 function fetchAllZones($year) {
+	$file_sum = getcwd() . '/' . FILENAME;
         $db = new Mysql(DB_NAME,DB_HOST,DB_USER,DB_PASS);
         $rs = $db->db_assoc("SELECT DISTINCT zone FROM kawasan");
+	$file = fopen($file_sum, "w");
         while(list(, $rw) = @each($rs)) {
                 $zone = strtoupper($rw['zone']);
-                fetchMonthly($zone, $year);
+                fetchAnnually($zone, $file);
         }
+	fclose($file);
 }
 
-function insertIntoMysql($zone, $year, $bulan, $ar) {
-        $db = new Mysql(DB_NAME,DB_HOST,DB_USER,DB_PASS);
-        foreach($ar as $v) {
-                $date = $v[0];
-                $exdate = explode(' ', $date);
-                $day = (int)$exdate[0];
-                $month = $bulan;
-                $mktime = mktime(0,0,0,$month,$day,$year);
-                $hari = date("N", $mktime);
-
-                $imsak = $v[2];
-                $subuh = $v[3];
-                $syuruk = $v[4];
-                $zohor = $v[5];
-                $asar = $v[6];
-                $maghrib = $v[7];
-                $isyak = $v[8];
-
-                echo "Inserting waktu solat for zone:$zone, date:$day-$month-$year";
-                $db->db_insert("INSERT INTO waktu_solat SET
-                        zone='".$zone."',
-                        day='".$day."',
-                        month='".$month."',
-                        year='".$year."',
-                        hari='".$hari."',
-                        imsak='".$imsak."',
-                        subuh='".$subuh."',
-                        syuruk='".$syuruk."',
-                        zohor='".$zohor."',
-                        asar='".$asar."',
-                        maghrib='".$maghrib."',
-                        isyak='".$isyak."',
-						created_at=NOW(),
-						updated_at=NOW()
-                ");
-                echo " -- done.\n";
-        }
-}
-
-function fetchData($zone, $year, $bulan) {
-        $url = 'http://www.e-solat.gov.my/web/muatturun.php?zone='.$zone.'&state=&year='.$year.'&jenis=year&bulan='.$bulan.'&LG=BM';
+function fetchAnnually($zone, $file) {
+        $url = 'https://www.e-solat.gov.my/index.php?r=esolatApi/takwimsolat&period=year&zone=' . $zone;
         echo $url . "\n";
+        $html = file_get_contents($url);
+        $array = json_decode($html);
 
-        if(PROXY == true) {
-                $context = array
-                (
-                        'http' => array
-                        (
-                                'proxy' => '10.1.255.20:8080',
-                                'request_fulluri' => true,
-                        ),
-                );
-                $context = stream_context_create($context);
-                $html = file_get_html($url, false, $context);
-        } else {
-                $html = file_get_html($url);
+        $days = [
+                'Monday' => 1,
+                'Tuesday' => 2,
+                'Wednesday' => 3,
+                'Thursday' => 4,
+                'Friday' => 5,
+                'Saturday' => 6,
+                'Sunday' => 7
+        ];
+
+        $mnths = [
+                'Jan' => 1,
+                'Feb' => 2,
+                'Mac' => 3,
+                'Apr' => 4,
+                'Mei' => 5,
+                'Jun' => 6,
+                'Jul' => 7,
+                'Ogos' => 8,
+                'Sep' => 9,
+                'Okt' => 10,
+                'Nov' => 11,
+                'Dis' => 12
+        ];
+
+	$md5sum = $zone . '|' . md5(serialize($array->prayerTime));
+	fwrite($file, $md5sum . "\n");
+
+        foreach ($array->prayerTime as $pt) {
+                $date = explode('-', $pt->date);
+                $d = $date[0];
+                $m = $mnths[$date[1]];
+                $y = $date[2];
+                $obj = [
+                        'zone' => $zone,
+                        'day' => $d,
+                        'month' => $m,
+                        'year' => $y,
+                        'hari' => $days[$pt->day],
+                        'imsak' => dateToTimestamp($d, $m, $y, $pt->imsak),
+                        'subuh' => dateToTimestamp($d, $m, $y, $pt->fajr),
+                        'syuruk' => dateToTimestamp($d, $m, $y, $pt->syuruk),
+                        'zohor' => dateToTimestamp($d, $m, $y, $pt->dhuhr),
+                        'asar' => dateToTimestamp($d, $m, $y, $pt->asr),
+                        'maghrib' => dateToTimestamp($d, $m, $y, $pt->maghrib),
+                        'isyak' => dateToTimestamp($d, $m, $y, $pt->isha),
+                ];
+                $obj = json_decode(json_encode($obj));
+                insertIntoDb($obj);
         }
-
-    if(!$html) return 0;
-        $result = $html->find('table[cellspacing="1"] tr');
-
-        $i = 0;
-        foreach($result as $element) {
-            if((int)trim($element->find('font[size=2]', 0)->plaintext) > 0) {
-
-                $ar[$i][0] = $date = parseDate($element, 0);
-                // $ar[$i][1] = timeToStamp($element, 1);
-                $ar[$i][2] = parseTime($element, 2, $year, $bulan, $date);
-                $ar[$i][3] = parseTime($element, 3, $year, $bulan, $date);
-                $ar[$i][4] = parseTime($element, 4, $year, $bulan, $date);
-                $ar[$i][5] = parseTime($element, 5, $year, $bulan, $date);
-                $ar[$i][6] = parseTime($element, 6, $year, $bulan, $date);
-                $ar[$i][7] = parseTime($element, 7, $year, $bulan, $date);
-                $ar[$i][8] = parseTime($element, 8, $year, $bulan, $date);
-
-                $i++;
-            }
-        }
-
-        if($i >= 28) insertIntoMysql($zone, $year, $bulan, $ar);
 }
 
-function parseDate($element, $index)
-{
-    $str = trim($element->find('font[size=2]', $index)->plaintext);
-    $exdate = explode(' ', $str);
-    $day = (int)$exdate[0];
-    return $day;
-}
-
-function parseTime($element, $index, $year, $bulan, $date)
-{
-    $str = trim($element->find('font[size=2]', $index)->plaintext);
-    $delimiter = ':';
-
-    $str = preg_replace("/[^0-9]/", $delimiter, $str);
-
-    $ex = explode($delimiter, $str);
-    if($index >= 5 && $ex[0] < 12) {
-        $h = $ex[0] + 12;
-    } else {
+function dateToTimestamp($D, $M, $Y, $prayer) {
+        $ex = explode(':', $prayer);
         $h = $ex[0];
-    }
-    $m = $ex[1];
-
-    $stamp = mktime($h, $m, 0, $bulan, $date, $year);
-    // echo $date.'-'.$bulan.'-'.$year . '-------';
-    // echo $str . ' -- ' . $h . $delimiter . $m . ' ===> ' . date('d-m-Y H:i', $stamp) . ' / ' . $stamp . "\n";
-    return $stamp;
+        $m = $ex[1];
+        return mktime($h, $m, 0, $M, $D, $Y);
 }
 
-function fetchMonthly($zone, $year) {
+function insertIntoDb($obj) {
         $db = new Mysql(DB_NAME,DB_HOST,DB_USER,DB_PASS);
-        $rs = $db->db_assoc("select distinct `month` from waktu_solat where zone='".$zone."' and year='".$year."';");
-        $months = array();
-        while(list(,$rw) = @each($rs)) {
-                $months[] = $rw['month'];
-        }
-        for($i=START_MONTH; $i<=12; $i++) {
-            if(!in_array($i, $months)) {
-                fetchData($zone, $year, $i);
-            } else {
-                echo 'Zone: ' . $zone . ' for ' . $i . '/' . $year . " -- Already Loaded\n";
-            }
-        }
+        echo "Inserting waktu solat for zone:$obj->zone, date:$obj->day-$obj->month-$obj->year";
+        $db->db_insert("INSERT INTO waktu_solat SET
+                zone='".$obj->zone."',
+                day='".$obj->day."',
+                month='".$obj->month."',
+                year='".$obj->year."',
+                hari='".$obj->hari."',
+                imsak='".$obj->imsak."',
+                subuh='".$obj->subuh."',
+                syuruk='".$obj->syuruk."',
+                zohor='".$obj->zohor."',
+                asar='".$obj->asar."',
+                maghrib='".$obj->maghrib."',
+                isyak='".$obj->isyak."',
+                created_at=NOW(),
+                updated_at=NOW()
+        ");
+        echo " -- done.\n";
+}
+
+function findChecksum($str) {
+	$file_sum = getcwd() . '/' . FILENAME;
+	$matches = array();
+	$handle = @fopen($file_sum, "r");
+	if ($handle) {
+   		while (!feof($handle)) {
+        		$buffer = fgets($handle);
+        		if(strpos($buffer, $str) !== FALSE)
+            		$matches[] = $buffer;
+    		}
+   		fclose($handle);
+	}
+
+	echo $matches[0];
 }
 
 ?>

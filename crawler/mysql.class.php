@@ -17,7 +17,7 @@ class Mysql {
 	var $user;
 	var $pass;
 
-	function Mysql($db,$hst="localhost",$usr="root",$pwd="") {
+	function __construct($db,$hst="localhost",$usr="root",$pwd="") {
 		$this->dbname = $db;
 		$this->host = $hst;
 		$this->user = $usr;
