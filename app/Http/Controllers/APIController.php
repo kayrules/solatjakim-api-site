@@ -135,7 +135,7 @@ class APIController extends Controller
 			$end = $start;
 		}
 
-		$maxlimit = 365;
+		$maxlimit = 730;
 		$total_days = ($end - $start) / $hour;
 
 		if (!$request->has('zone')) {
