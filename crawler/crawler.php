@@ -8,32 +8,44 @@ require 'mysql.class.php';
 
 define('PROXY', false);
 define('DB_HOST','localhost');
-define('DB_NAME','api_solatjakim');
+define('DB_NAME','api_solatjakim_2');
 define('DB_USER','euph0rix');
 define('DB_PASS','@fjme90!');
 define('START_MONTH',1);
-define('FILENAME', 'checksum.txt');
 
 //start process
-fetchAllZones('2020');
-// fetchAnnually('JHR01');
+fetchAllZones('2021');
 
 function fetchAllZones($year) {
-	$file_sum = getcwd() . '/' . FILENAME;
         $db = new Mysql(DB_NAME,DB_HOST,DB_USER,DB_PASS);
         $rs = $db->db_assoc("SELECT DISTINCT zone FROM kawasan");
-	$file = fopen($file_sum, "w");
         while(list(, $rw) = @each($rs)) {
                 $zone = strtoupper($rw['zone']);
-                fetchAnnually($zone, $file);
+                fetchAnnually($zone, $year);
         }
-	fclose($file);
 }
 
-function fetchAnnually($zone, $file) {
-        $url = 'https://www.e-solat.gov.my/index.php?r=esolatApi/takwimsolat&period=year&zone=' . $zone;
+function curlContent($url, $year) {
+        $handle = curl_init();
+        $postfields = array("datestart" => "$year-01-01", "dateend" => "$year-12-31");
+	print_r($postfields);
+        
+        curl_setopt($handle, CURLOPT_URL, $url);
+        curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($handle, CURLOPT_HTTPHEADER, ['Content-Type: multipart/form-data;']);
+        curl_setopt($handle, CURLOPT_POSTFIELDS, $postfields);
+
+        $output = curl_exec($handle);
+        curl_close($handle);
+	// echo $output;
+	return $output;
+}
+
+function fetchAnnually($zone, $year) {
+        $url = 'https://www.e-solat.gov.my/index.php?r=esolatApi/takwimsolat&period=duration&zone=' . $zone;
         echo $url . "\n";
-        $html = file_get_contents($url);
+        // $html = file_get_contents($url);
+	$html = curlContent($url, $year);
         $array = json_decode($html);
 
         $days = [
@@ -60,9 +72,6 @@ function fetchAnnually($zone, $file) {
                 'Nov' => 11,
                 'Dis' => 12
         ];
-
-	$md5sum = $zone . '|' . md5(serialize($array->prayerTime));
-	fwrite($file, $md5sum . "\n");
 
         foreach ($array->prayerTime as $pt) {
                 $date = explode('-', $pt->date);
@@ -115,22 +124,6 @@ function insertIntoDb($obj) {
                 updated_at=NOW()
         ");
         echo " -- done.\n";
-}
-
-function findChecksum($str) {
-	$file_sum = getcwd() . '/' . FILENAME;
-	$matches = array();
-	$handle = @fopen($file_sum, "r");
-	if ($handle) {
-   		while (!feof($handle)) {
-        		$buffer = fgets($handle);
-        		if(strpos($buffer, $str) !== FALSE)
-            		$matches[] = $buffer;
-    		}
-   		fclose($handle);
-	}
-
-	echo $matches[0];
 }
 
 ?>
