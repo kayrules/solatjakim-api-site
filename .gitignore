@@ -11,3 +11,4 @@ sftp-config.json
 HOWTO
 Envoy.blade.php
 .gitignore
+run.sh
